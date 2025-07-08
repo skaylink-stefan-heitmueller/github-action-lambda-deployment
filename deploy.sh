@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 # redefine variables from ENV to prevent SC2154
