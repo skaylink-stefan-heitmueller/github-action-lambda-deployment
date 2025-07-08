@@ -6,8 +6,8 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 # redefine variables from ENV to prevent SC2154
 # shellcheck disable=SC2269
 region="${region}"
-# shellcheck disable=SC2269
-function_name="${function_name}"
+# shellcheck disable=SC2269,SC2153
+function_name="${FUNCTION_NAME}"
 # shellcheck disable=SC1091
 . "${script_dir}/functions"
 
@@ -49,7 +49,7 @@ printf "\n\e[1;36mUploading code ...\e[0m\n\n"
 ### deploy code
 aws \
     lambda "$lambda_command" \
-    --region "${region:-eu-central-1}" \
+    --region "${region}" \
     --function-name "${function_name}" \
     "${lambda_opts[@]}" \
     --zip-file fileb://"${ZIP_FILE}" | jq '.'
