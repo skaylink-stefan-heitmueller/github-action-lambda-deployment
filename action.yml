@@ -47,6 +47,13 @@ inputs:
   environment-variables:
     description: >-
       Environment Variables (comma delimited list of key=value pairs).
+  architectures:
+    description: >-
+      Architectures.
+    default: x86-64
+  memory-size:
+    description: >-
+      Memory size.
 runs:
   using: composite
   steps:
@@ -81,3 +88,5 @@ runs:
         REGION: ${{ inputs.region }}
         NAME: ${{ inputs.name }}
         PUBLIC_URL: ${{ inputs.public-url }}
+        ARCHITECTURES: ${{ inputs.architectures }}
+        MEMORY_SIZE: ${{ inputs.memory-size }}

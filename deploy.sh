@@ -16,6 +16,10 @@ name="${NAME}"
 timeout="${TIMEOUT}"
 # shellcheck disable=SC2153
 role_arn="${ROLE_ARN}"
+# shellcheck disable=SC2153
+architectures="${ARCHITECTURES}"
+# shellcheck disable=SC2153
+memory_size="${MEMORY_SIZE}"
 # shellcheck disable=SC1091
 . "${script_dir}/functions"
 
@@ -32,6 +36,12 @@ if [[ -z "$arn" ]]; then
         "--handler" "${handler}"
         "--timeout" "${timeout:-30}"
     )
+    if [[ -n "${architectures}" ]]; then
+        lambda_opts+=("--architectures" "${architectures}")
+    fi
+    if [[ -n "${memory_size}" ]]; then
+        lambda_opts+=("--memory-size" "${memory_size}")
+    fi
 else
     lambda_command="update-function-code"
     update="True"
@@ -41,21 +51,28 @@ if [[ -n "${PUBLIC_URL}" ]]; then
     IFS=',' read -r -a envs <<<"${ENVIRONMENT_VARIABLES}"
 
     # shellcheck disable=SC2048,SC2086
-    jo ${envs[*]} >/tmp/vars
-    jo Variables=:/tmp/vars >/tmp/env
+    jo ${envs[*]} >/tmp/vars.json
+    jo Variables=:/tmp/vars.json >/tmp/env.json
 else
     echo "{}" >/tmp/env
 fi
 
+update=(FunctionName="${name}")
+update+=(Role="${role_arn}")
+update+=(Handler="${handler}")
 # shellcheck disable=SC2086
-jo \
-    FunctionName="${name}" \
-    Role="${role_arn}" \
-    Handler="${handler}" \
-    Timeout=${timeout} \
-    Environment=:/tmp/env \
-    Runtime="${runtime}" \
-    >/tmp/update.json
+update+=(Timeout=${timeout})
+update+=(Environment=:/tmp/env.json)
+update+=(Runtime="${runtime}")
+if [[ -n "${architectures}" ]]; then
+    update+=(Architectures="${architectures}")
+fi
+if [[ -n "${memory_size}" ]]; then
+    udate+=(MemorySize="${memory_size}")
+fi
+
+# shellcheck disable=SC2048,SC2086
+jo ${update[*]} >/tmp/update.json
 
 printf "\n\e[1;36mUploading code ...\e[0m\n\n"
 
