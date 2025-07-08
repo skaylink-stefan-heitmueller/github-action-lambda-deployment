@@ -13,7 +13,7 @@ region="${REGION}"
 # shellcheck disable=SC2153
 name="${NAME}"
 # shellcheck disable=SC2153
-timeout="${TIMEOUT}"
+declare -i timeout=${TIMEOUT:-30}
 # shellcheck disable=SC2153
 role_arn="${ROLE_ARN}"
 # shellcheck disable=SC2153
@@ -57,19 +57,19 @@ else
     echo "{}" >/tmp/env
 fi
 
-update=(FunctionName="${name}")
-update+=(Role="${role_arn}")
-update+=(Handler="${handler}")
-# shellcheck disable=SC2086
-update+=(Timeout=${timeout})
-update+=(Environment=:/tmp/env.json)
-update+=(Runtime="${runtime}")
+update_json=(FunctionName="${name}")
+update_json+=(Role="${role_arn}")
+update_json+=(Handler="${handler}")
+# shellcheck disable=SC2086,SC2206
+update_json+=(Timeout=${timeout})
+update_json+=(Environment=:/tmp/env.json)
+update_json+=(Runtime="${runtime}")
 if [[ -n "${memory_size}" ]]; then
     udate+=(MemorySize="${memory_size}")
 fi
 
 # shellcheck disable=SC2048,SC2086
-jo ${update[*]} >/tmp/update.json
+jo ${update_json[*]} >/tmp/update.json
 
 printf "\n\e[1;36mUploading code ...\e[0m\n\n"
 
