@@ -7,11 +7,11 @@ script_dir="$(dirname "$(readlink -f "$0")")"
 # shellcheck disable=SC2269,SC2153
 region="${REGION}"
 # shellcheck disable=SC2269,SC2153
-function_name="${FUNCTION_NAME}"
+name="${NAME}"
 # shellcheck disable=SC1091
 . "${script_dir}/functions"
 
-arn="$(get_function_arn "${region}" "${function_name}")"
+arn="$(get_function_arn "${region}" "${name}")"
 
 printf "\n\e[1;36mPreparing upload ...\e[0m\n\n"
 
@@ -36,7 +36,7 @@ jo ${envs[*]} >/tmp/env
 
 # shellcheck disable=SC2086
 jo \
-    FunctionName="${function_name}" \
+    FunctionName="${name}" \
     Role="${role_arn}" \
     Handler="${handler}" \
     Timeout=${timeout} \
@@ -50,7 +50,7 @@ printf "\n\e[1;36mUploading code ...\e[0m\n\n"
 aws \
     lambda "$lambda_command" \
     --region "${region}" \
-    --function-name "${function_name}" \
+    --function-name "${name}" \
     "${lambda_opts[@]}" \
     --zip-file fileb://"${ZIP_FILE}" | jq '.'
 
@@ -73,9 +73,9 @@ if [[ -n "${PUBLIC_URL}" ]]; then
 
     ### check and add permissions if necessary
     filter='.Policy | fromjson | .Statement[] | select(.Sid=="FunctionURLAllowPublicAccess")'
-    if ! permission="$(aws lambda get-policy --function-name "${function_name}" | jq -e "${filter}")"; then
+    if ! permission="$(aws lambda get-policy --function-name "${name}" | jq -e "${filter}")"; then
         permission="$(aws lambda add-permission \
-            --function-name "${function_name}" \
+            --function-name "${name}" \
             --action lambda:InvokeFunctionUrl \
             --principal "*" \
             --function-url-auth-type "NONE" \
@@ -85,11 +85,11 @@ if [[ -n "${PUBLIC_URL}" ]]; then
 
     printf "\n\e[0;36m  config ...\e[0m\n\n"
     ### check existing function url config
-    if ! url="$(aws lambda get-function-url-config --function-name "${function_name}")"; then
+    if ! url="$(aws lambda get-function-url-config --function-name "${name}")"; then
         ### create function url config
         url="$(aws \
             lambda create-function-url-config \
-            --function-name "${function_name}" \
+            --function-name "${name}" \
             --auth-type NONE)"
     fi
     jq '.' <<<"${url}"
