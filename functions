@@ -1,0 +1,10 @@
+#!/bin/bash
+
+get_function_arn() {
+  local region="${1:-eu-central-1}"
+  local function_name="$2"
+  aws \
+    --region "$region" \
+    lambda list-functions \
+    --query "Functions[?FunctionName=='${function_name}']" | jq -r '.[].FunctionArn'
+}

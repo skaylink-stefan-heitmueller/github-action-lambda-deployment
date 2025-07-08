@@ -1,0 +1,88 @@
+---
+# yamllint disable rule:line-length
+name: Deploy Lambda Function
+description: Deploy Lambda Function
+branding:
+  icon: package
+  color: orange
+inputs:
+  aws-access-key-id:
+    description: >-
+      AWS_ACCESS_KEY_ID.
+    required: true
+  aws-secret-access-key:
+    description: >-
+      AWS_SECRET_ACCESS_KEY.
+    required: true
+  zip-file:
+    description: >-
+      ZIP file.
+    required: true
+  runtime:
+    description: >-
+      Runtime.
+    required: true
+  handler:
+    description: >-
+      Function Handler.
+    required: true
+  role-arn:
+    description: >-
+      Function Role ARN.
+    required: true
+  region:
+    description: >-
+      AWS Region.
+    required: true
+  name:
+    description: >-
+      Function name.
+    required: true
+  timeout:
+    description: >-
+      Function Timeout. Defaults to 30s.
+  public-url:
+    description: >-
+      Enable public URL.
+  environment-variables:
+    description: >-
+      Environment Variables (comma delimited list of key=value pairs).
+outputs:
+  arn:
+    description: >-
+      Function ARN.
+    value: ${{ steps.lambda-deployment.outputs.arn }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+    - name: Setup awscli Repository
+      uses: myci-actions/add-deb-repo@11
+      with:
+        repo: deb https://packaging.gitlab.io/aws-cli/deb aws-cli main
+        repo-name: awscli
+        keys-asc: https://packaging.gitlab.io/aws-cli/deb/gpg.key
+        update: true
+    - name: Install Packages
+      uses: awalsh128/cache-apt-pkgs-action@v1.5.1
+      with:
+        packages: aws-cli jo jq
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+        aws-region: eu-central-1
+    - name: Deploy Lambda Function
+      id: lambda-deployment
+      run: ${GITHUB_ACTION_PATH}/deploy.sh
+      shell: bash
+      env:
+        ZIP_FILE: ${{ inputs.zip-file }}
+        RUNTIME: ${{ inputs.runtime }}
+        HANDLER: ${{ inputs.handler }}
+        ROLE_ARN: ${{ inputs.role-arn }}
+        ENVIRONMENT_VARIABLES: ${{ inputs.environment-variables }}
+        REGION: ${{ inputs.region }}
+        NAME: ${{ inputs.name }}
+        PUBLIC_URL: ${{ inputs.public-url }}
