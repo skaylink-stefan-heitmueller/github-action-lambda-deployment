@@ -64,9 +64,6 @@ update+=(Handler="${handler}")
 update+=(Timeout=${timeout})
 update+=(Environment=:/tmp/env.json)
 update+=(Runtime="${runtime}")
-if [[ -n "${architectures}" ]]; then
-    update+=(Architectures="${architectures}")
-fi
 if [[ -n "${memory_size}" ]]; then
     udate+=(MemorySize="${memory_size}")
 fi
@@ -82,7 +79,7 @@ aws \
     --region "${region}" \
     --function-name "${name}" \
     "${lambda_opts[@]}" \
-    --zip-file fileb://"${ZIP_FILE}" | jq '.'
+    --zip-file fileb://"${ZIP_FILE}" | jq -e '.'
 
 sleep 10
 
@@ -93,7 +90,7 @@ if [[ -n "$update" ]]; then
     aws \
         lambda update-function-configuration \
         --region "${region}" \
-        --cli-input-json file:///tmp/update.json | jq '.'
+        --cli-input-json file:///tmp/update.json | jq -e '.'
 fi
 
 if [[ -n "${PUBLIC_URL}" ]]; then
@@ -111,9 +108,9 @@ if [[ -n "${PUBLIC_URL}" ]]; then
             --action lambda:InvokeFunctionUrl \
             --principal "*" \
             --function-url-auth-type "NONE" \
-            --statement-id FunctionURLAllowPublicAccess | jq "${filter}")"
+            --statement-id FunctionURLAllowPublicAccess | jq -e "${filter}")"
     fi
-    jq '.' <<<"${permission}"
+    jq -e '.' <<<"${permission}"
 
     printf "\n\e[0;36m  config ...\e[0m\n\n"
 
@@ -127,5 +124,5 @@ if [[ -n "${PUBLIC_URL}" ]]; then
             --function-name "${name}" \
             --auth-type NONE)"
     fi
-    jq '.' <<<"${url}"
+    jq -e '.' <<<"${url}"
 fi
