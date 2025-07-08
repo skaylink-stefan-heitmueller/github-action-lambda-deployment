@@ -67,7 +67,7 @@ aws \
     "${lambda_opts[@]}" \
     --zip-file fileb://"${ZIP_FILE}" | jq '.'
 
-sleep 5
+sleep 10
 
 printf "\n\e[1;36mConfiguration ...\e[0m\n\n"
 
@@ -75,12 +75,14 @@ printf "\n\e[1;36mConfiguration ...\e[0m\n\n"
 if [[ -n "$update" ]]; then
     aws \
         lambda update-function-configuration \
-        --region "${region:-eu-central-1}" \
+        --region "${region}" \
         --cli-input-json file:///tmp/update.json | jq '.'
 fi
 
 if [[ -n "${PUBLIC_URL}" ]]; then
     printf "\n\e[1;36mLambda function URL ...\e[0m\n\n"
+
+    sleep 10
 
     printf "\n\e[0;36m  permissions ...\e[0m\n\n"
 
@@ -97,6 +99,9 @@ if [[ -n "${PUBLIC_URL}" ]]; then
     jq '.' <<<"${permission}"
 
     printf "\n\e[0;36m  config ...\e[0m\n\n"
+
+    sleep 10
+
     ### check existing function url config
     if ! url="$(aws lambda get-function-url-config --function-name "${name}")"; then
         ### create function url config
