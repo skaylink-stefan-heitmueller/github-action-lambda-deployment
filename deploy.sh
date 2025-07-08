@@ -4,8 +4,8 @@ set -e
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 # redefine variables from ENV to prevent SC2154
-# shellcheck disable=SC2269
-region="${region}"
+# shellcheck disable=SC2269,SC2153
+region="${REGION}"
 # shellcheck disable=SC2269,SC2153
 function_name="${FUNCTION_NAME}"
 # shellcheck disable=SC1091
