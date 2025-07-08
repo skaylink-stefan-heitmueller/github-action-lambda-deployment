@@ -4,10 +4,18 @@ set -e
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 # redefine variables from ENV to prevent SC2154
-# shellcheck disable=SC2269,SC2153
+# shellcheck disable=SC2153
+handler="${HANDLER}"
+# shellcheck disable=SC2153
+runtime="${RUNTIME}"
+# shellcheck disable=SC2153
 region="${REGION}"
-# shellcheck disable=SC2269,SC2153
+# shellcheck disable=SC2153
 name="${NAME}"
+# shellcheck disable=SC2153
+timeout="${TIMEOUT}"
+# shellcheck disable=SC2153
+role_arn="${ROLE_ARN}"
 # shellcheck disable=SC1091
 . "${script_dir}/functions"
 
@@ -29,10 +37,15 @@ else
     update="True"
 fi
 
-IFS=',' read -r -a envs <<<"${ENVIRONMENT_VARIABLES}"
+if [[ -n "${PUBLIC_URL}" ]]; then
+    IFS=',' read -r -a envs <<<"${ENVIRONMENT_VARIABLES}"
 
-# shellcheck disable=SC2048,SC2086
-jo ${envs[*]} >/tmp/env
+    # shellcheck disable=SC2048,SC2086
+    jo ${envs[*]} >/tmp/vars
+    jo Variables=:/tmp/vars >/tmp/env
+else
+    echo "{}" >/tmp/env
+fi
 
 # shellcheck disable=SC2086
 jo \
