@@ -47,11 +47,6 @@ inputs:
   environment-variables:
     description: >-
       Environment Variables (comma delimited list of key=value pairs).
-outputs:
-  arn:
-    description: >-
-      Function ARN.
-    value: ${{ steps.lambda-deployment.outputs.arn }}
 runs:
   using: composite
   steps:
@@ -75,7 +70,7 @@ runs:
         aws-region: eu-central-1
     - name: Deploy Lambda Function
       id: lambda-deployment
-      run: ${GITHUB_ACTION_PATH}/deploy.sh
+      run: ${{ github.action_path }}/deploy.sh
       shell: bash
       env:
         ZIP_FILE: ${{ inputs.zip-file }}
