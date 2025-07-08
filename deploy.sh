@@ -109,7 +109,7 @@ if [[ -n "${PUBLIC_URL}" ]]; then
             --action lambda:InvokeFunctionUrl \
             --principal "*" \
             --function-url-auth-type "NONE" \
-            --statement-id FunctionURLAllowPublicAccess | jq -e "${filter}")"
+            --statement-id FunctionURLAllowPublicAccess | jq -e '.')"
     fi
     jq -e '.' <<<"${permission}"
 
